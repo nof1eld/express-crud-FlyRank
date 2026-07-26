@@ -35,7 +35,7 @@ app.get("/tasks/:id", (req, res) => {
 app.post("/tasks", (req, res) => {
   const title = req.body.title;
   if (!title || title == "") {
-    return res.status(400).send({ error: `Title is missing`})
+    return res.status(400).send({ error: `Title is missing`});
   }
 
   const MaxId = Math.max(...tasks.map(task => task.id));
@@ -46,9 +46,46 @@ app.post("/tasks", (req, res) => {
     title,
     done: false
   };
-  tasks.push(task)
+  tasks.push(task);
   res.status(201).send(task);
 });
+
+app.put("/tasks/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const title = req.body.title;
+  const done = req.body.done;
+
+  if ((!title && done == undefined) || title == "") {
+    return res.status(400).send({ error: `Invalid body`});
+  }
+ 
+  const index = tasks.findIndex(task => task.id === id);
+  if (index === -1) {
+    return res.status(404).send({ error: `Unknown ID`});
+  }
+  const existingTask = tasks[index]
+  const updatedTask = {
+    ...existingTask,
+    ...(title !== undefined && { title }),
+    ...(done !== undefined && { done }),
+  };
+
+  tasks[index] = updatedTask;
+  res.status(201).send(updatedTask);
+});
+
+app.delete("/tasks/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+ 
+  const index = tasks.findIndex(task => task.id === id);
+  if (index === -1) {
+    return res.status(404).send({ error: `Unknown ID`});
+  }
+
+  tasks.splice(index, 1);
+  res.sendStatus(204);
+});
+
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);
