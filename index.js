@@ -1,6 +1,10 @@
 const express = require("express");
+const swagger = require('swagger-ui-express');
+const openAPIDocument = require('./openapi.json');
+
 const app = express();
 const port = 3000;
+
 
 tasks = [
   { id: 1, title: "Create a todo-list app", done: true },
@@ -10,6 +14,8 @@ tasks = [
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
+app.use("/docs", swagger.serve, swagger.setup(openAPIDocument));
+
 
 app.get("/", (req, res) => {
   res.status(200).send({ name: "Task API", version: "1.0", endpoints: ["/tasks"] });
@@ -71,7 +77,7 @@ app.put("/tasks/:id", (req, res) => {
   };
 
   tasks[index] = updatedTask;
-  res.status(201).send(updatedTask);
+  res.status(200).send(updatedTask);
 });
 
 app.delete("/tasks/:id", (req, res) => {
