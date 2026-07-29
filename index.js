@@ -1,16 +1,37 @@
+const sqlite3 = require("sqlite3");
+
 const express = require("express");
 const swagger = require('swagger-ui-express');
 const openAPIDocument = require('./openapi.json');
 
 const app = express();
 const port = 3000;
+const db = new sqlite3.Database("tasks.db");
 
+db.run(`
+  CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    done INTEGER NOT NULL DEFAULT 0
+  )
+`);
 
 tasks = [
   { id: 1, title: "Create a todo-list app", done: true },
   { id: 2, title: "Do laundry", done: false },
   { id: 3, title: "Breathe", done: true },
 ];
+
+db.get("SELECT COUNT(*) AS count FROM tasks", [], (err, row) => {
+  if (err) { return console.error(err.message); }
+  if (row.count == 0) {
+    db.run("INSERT INTO tasks (id, title, done) VALUES (?, ?, ?)", [1, "Create a todo-list app", 1]);
+    db.run("INSERT INTO tasks (id, title, done) VALUES (?, ?, ?)", [2, "Do laundry", 0]);
+    db.run("INSERT INTO tasks (id, title, done) VALUES (?, ?, ?)", [3, "Breathe", 1]);
+  }
+});
+
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
@@ -61,7 +82,7 @@ app.put("/tasks/:id", (req, res) => {
   const title = req.body.title;
   const done = req.body.done;
 
-  if ((!title && done == undefined) || title == "") {
+  if ((!title && done == undefined) || title == "" || typeof done !== "boolean") {
     return res.status(400).send({ error: `Invalid body`});
   }
  
@@ -96,3 +117,5 @@ app.delete("/tasks/:id", (req, res) => {
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);
 });
+
+db.close();
