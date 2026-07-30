@@ -63,7 +63,7 @@ app.get("/tasks/:id", (req, res) => {
   const id = parseInt(req.params.id);
   db.get("SELECT * FROM tasks WHERE id = ?", [id], (err, task) => {
   if (err) { return console.error(err.message); }
-  
+
   if (!task) {
     return res.status(404).send({ error: `Task ${id} not found`});
   }
@@ -79,16 +79,15 @@ app.post("/tasks", (req, res) => {
     return res.status(400).send({ error: `Title is missing`});
   }
 
-  const MaxId = Math.max(...tasks.map(task => task.id));
-  const id = MaxId + 1;
-
-  const task = {
-    id,
-    title,
-    done: false
-  };
-  tasks.push(task);
-  res.status(201).send(task);
+  db.run("INSERT INTO tasks (title, done) VALUES (?, ?)", [title, 0], function(err) {
+    if (err) { return console.error(err.message); }
+    const task = {
+      id: this.lastID,
+      title,
+      done: 0
+    }
+    res.status(201).send(task);
+  });
 });
 
 app.put("/tasks/:id", (req, res) => {
