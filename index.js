@@ -47,16 +47,30 @@ app.get("/health", (req, res) => {
 });
 
 app.get("/tasks", (req, res) => {
-  res.status(200).send(tasks);
+  db.all("SELECT * FROM tasks", [], (err, tasks) => {
+  if (err) { return console.error(err.message); }
+  
+  if (tasks) {
+    for (const task of tasks) {
+      task.done === 1 ? task.done = true : task.done = false;
+    }
+      res.status(200).send(tasks);
+  }
+});
 });
 
 app.get("/tasks/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  const task = tasks.find((t) => t.id === id);
+  db.get("SELECT * FROM tasks WHERE id = ?", [id], (err, task) => {
+  if (err) { return console.error(err.message); }
+  
   if (!task) {
     return res.status(404).send({ error: `Task ${id} not found`});
   }
+
+  task.done === 1 ? task.done = true : task.done = false;
   res.status(200).send(task);
+  });
 });
 
 app.post("/tasks", (req, res) => {
@@ -118,4 +132,3 @@ app.listen(port, () => {
   console.log(`app listening on port ${port}`);
 });
 
-db.close();
