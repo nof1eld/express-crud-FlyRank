@@ -16,11 +16,6 @@ db.run(`
   )
 `);
 
-tasks = [
-  { id: 1, title: "Create a todo-list app", done: true },
-  { id: 2, title: "Do laundry", done: false },
-  { id: 3, title: "Breathe", done: true },
-];
 
 db.get("SELECT COUNT(*) AS count FROM tasks", [], (err, row) => {
   if (err) { return console.error(err.message); }
