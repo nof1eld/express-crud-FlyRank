@@ -84,7 +84,7 @@ app.post("/tasks", (req, res) => {
     const task = {
       id: this.lastID,
       title,
-      done: 0
+      done: false
     }
     res.status(201).send(task);
   });
@@ -98,32 +98,32 @@ app.put("/tasks/:id", (req, res) => {
   if ((!title && done == undefined) || title == "" || typeof done !== "boolean") {
     return res.status(400).send({ error: `Invalid body`});
   }
- 
-  const index = tasks.findIndex(task => task.id === id);
-  if (index === -1) {
-    return res.status(404).send({ error: `Unknown ID`});
-  }
-  const existingTask = tasks[index]
-  const updatedTask = {
-    ...existingTask,
-    ...(title !== undefined && { title }),
-    ...(done !== undefined && { done }),
-  };
 
-  tasks[index] = updatedTask;
-  res.status(200).send(updatedTask);
+  db.run("UPDATE tasks SET title = ?, done = ? WHERE id = ?", [title, done, id], function(err) {
+    if (err) { return console.error(err.message); }
+    if (this.changes === 0) {
+      return res.status(404).send({ error: `Unknown ID`});
+    }
+    const updatedTask = {
+      id,
+      title,
+      done
+    }
+    res.status(200).send(updatedTask);
+  });
 });
 
 app.delete("/tasks/:id", (req, res) => {
   const id = parseInt(req.params.id);
  
-  const index = tasks.findIndex(task => task.id === id);
-  if (index === -1) {
-    return res.status(404).send({ error: `Unknown ID`});
-  }
+  db.run("DELETE FROM tasks WHERE id = ?", [id], function(err) {
+    if (err) { return console.error(err.message); }
+    if (this.changes === 0) {
+      return res.status(404).send({ error: `Unknown ID`});
+    }
+    res.sendStatus(204);
+  });
 
-  tasks.splice(index, 1);
-  res.sendStatus(204);
 });
 
 
