@@ -1,14 +1,41 @@
 # Simple CRUD App
 
-This is a small Express.js API with basid CRUD operations made for FlyRank Backend Development track.
+This is a small Express.js API with basic CRUD operations made for the FlyRank Backend Development track.
 
-## Install and Run
+## Start the Project
 
 ```sh
 npm install; node index.js
 ```
 
 The server runs at `http://localhost:3000`, and Swagger UI is available at `http://localhost:3000/docs`.
+
+## SQLite Database
+
+SQLite was chosen to replace the previous in-memory approach because it simply stores the data in a single file, needs zero database server setup, and data survives app restarts.
+
+The database file lives at:
+
+```txt
+tasks.db
+```
+which is created upon the app launch (if it doesn't already exist)
+
+Example SQL query:
+
+```sql
+SELECT COUNT(*) FROM tasks;
+```
+
+Example response:
+
+```txt
+3
+```
+
+Database open in DB Browser:
+
+![Database open in DB Browser](./SQLITE-browser.png)
 
 ## Endpoints
 
